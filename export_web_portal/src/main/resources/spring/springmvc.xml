@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!--第一：springmvc配置(扫描的是@Controller注解)-->
+    <context:component-scan base-package="com.itit.web"/>
+    <!--开启springmvc注解驱动-->
+    <mvc:annotation-driven/>
+
+    <!--第二：dubbo配置-->
+    <!--1. 服务消费者项目名称，唯一-->
+    <dubbo:application name="export_web_portal"/>
+    <!--2. 配置注册中心地址-->
+    <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
+    <!--3. 配置dubbo包扫描(扫描的是@Reference注解)-->
+    <dubbo:annotation package="com.itit.web"/>
+
+</beans>

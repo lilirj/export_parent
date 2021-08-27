@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--注解扫描
+    加载配置文件
+    创建连接池
+    创建sqlSession对象
+    创建代理-->
+    <!--主要配置数据库相关、spring整合mybatis的配置-->
+
+    <!--注解扫描-->
+    <context:component-scan base-package="com.itit.domain"/>
+    <!--1. 加载配置文件-->
+    <context:property-placeholder location="classpath:properties/db.properties"/>
+    <!--2. 创建连接池-->
+    <!--
+       property 依赖注入的标签
+           name  对应class中的set方法
+           value 注入的值，传递给set方法的值
+                 举例：${jdbc.driver} 读取配置文件key对应的value值
+   -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--3. Spring整合MyBatis配置（1）创建SqlSessionFactory的工厂，交给spring创建-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <property name="dataSource" ref="dataSource"/>
+        <!--分页插件配置-->
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <!--使用下面的方式配置参数，一行配置一个 -->
+                        <value>
+                            <!--helperDialect  指定分页插件使用哪种数据库语言
+                            reasonable 合理化分页参数 当前页数>总页数 查询最后一页  当前页数<=0 查询第一页-->
+                            helperDialect=mysql
+                            reasonable=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+
+    <!--4. Spring整合MyBatis配置（2）映射扫描配置 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="mapperScannerConfigurer">
+        <!--4.1 扫描指定包，自动加载该目录及其所有目录下的接口映射文件。要求：接口名称与映射文件名称同名。-->
+        <!--4.2 自动对当前接口生产代理，且加入容器-->
+        <property name="basePackage" value="com.itit.dao"/>
+    </bean>
+</beans>

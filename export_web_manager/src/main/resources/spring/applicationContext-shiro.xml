@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!--1. 创建过滤器的工厂，注入SecruityManager对象-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+
+        <!--1.1 注入SecruityManager对象-->
+        <property name="securityManager" ref="securityManager"/>
+
+        <!--1.2 注入其他参数-->
+        <!--1.2.1 指定登录页面的地址；认证失败默认跳转的页面-->
+        <property name="loginUrl" value="/login.jsp"/>
+        <!--1.2.2 登录成功默认跳转的页面; 如果程序有指定登录成功跳转的页面，以程序指定为主-->
+        <property name="successUrl" value="/index.jsp"/>
+        <!--1.2.3 授权失败，默认跳转的页面-->
+        <property name="unauthorizedUrl" value="/unauthorized.jsp"/>
+
+        <!--
+            1.2.4 过滤器配置
+            语法： 左侧就是访问的资源 = 右侧就是过滤器
+            注意： /* 匹配所有资源；  /** 匹配所有目录及其子目录的所有资源
+            举例：/css/** = anon
+                 表示css目录及其子目录下的所有资源，放行，可以直接访问。
+            过滤器：
+                anon  匿名访问过滤器，这里的资源是直接放行的，不需要认证
+                authc 认证过滤器
+                      /** = authc  其他所有资源都需要认证后才能访问
+			注意：
+                这里不要添加逗号
+        -->
+        <property name="filterChainDefinitions">
+            <value>
+                /css/**=anon      <!--  anon匿名访问服务器直接放行  -->
+                /img/**=anon
+                /make/**=anon
+                /plugins/**=anon
+                /login*=anon       <!--放行登陆页面的请求-->
+                /login.jsp=anon    <!--放行登陆页面-->
+                /index.jsp=anon
+                /logout*=logout    <!--logout退出过滤器-->
+                /system/user/list*=perms["用户管理"]   <!--perms授权过滤器-->
+                /system/module/list=perms["角色管理"]
+                /** = authc       <!--除以上的其他资源  authc进行认证-->
+
+            </value>
+        </property>
+    </bean>
+
+    <!--2. 创建SecruityManager对象,注入自定义的realm-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"/>
+    </bean>
+
+    <!--3. 创建自定义的realm 可以访问数据库中权限数据-->
+    <bean id="myRealm" class="com.itit.web.shiro.AuthRealm">
+        <!--注入凭证匹配器-->
+        <property name="credentialsMatcher" ref="credentialsMatcher"></property>
+    </bean>
+
+    <!--4. 创建凭证匹配器，自动对用户输入的密码，按照指定的算法进行加密。-->
+    <bean id="credentialsMatcher" class="com.itit.web.shiro.CustomCredentialsMatcher">
+    </bean>
+
+    <!--开启shiro授权 的注解支持-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace 指定对哪个接口进行映射-->
+<mapper namespace="com.itit.dao.company.CompanyDao">
+
+    <!--定义一个结果集map，用来建立 查询列与对象属性 的映射关系-->
+    <resultMap id="BaseResultMap" type="com.itit.domain.company.Company">
+        <!--如果是主键，推荐使用id标签。用普通的result标签也可以-->
+        <id column="id" property="id"/>
+        <result property="name" column="name"/>
+        <result property="expirationDate" column="expiration_date"/>
+        <result property="address" column="address"/>
+        <result property="licenseId" column="license_id"/>
+        <result property="representative" column="representative"/>
+        <result property="phone" column="phone"/>
+        <result property="companySize" column="company_size"/>
+        <result property="industry" column="industry"/>
+        <result property="remarks" column="remarks"/>
+        <result property="state" column="state"/>
+        <result column="balance" property="balance"/>
+        <result column="city" property="city"/>
+    </resultMap>
+
+    <!--
+        select  对应查询语句
+            id  对应namespace中接口中的方法名称
+            resultMap 映射查询结果； 当查询类与对象属性不一致使用
+    -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM `ss_company`
+    </select>
+
+    <!--parameterType 可以省略；-->
+    <!--但是方法一旦有返回值，必须指定resutlType或者resultMap-->
+    <insert id="save" >
+        INSERT INTO `ss_company`
+        (   `id`,
+            `name`,
+            `expiration_date`,
+            `address`,
+            `license_id`,
+            `representative`,
+            `phone`,
+            `company_size`,
+            `industry`,
+            `remarks`,
+            `state`,
+            `balance`,
+            `city`
+        )
+        VALUES
+        (
+            #{id},
+            #{name},
+            #{expirationDate},
+            #{address},
+            #{licenseId},
+            #{representative},
+            #{phone},
+            #{companySize},
+            #{industry},
+            #{remarks},
+            #{state},
+            #{balance},
+            #{city}
+        )
+    </insert>
+
+    <!--
+        接口：void update(Company company);
+        映射：
+            1. 使用<update标签>
+            2. <update>
+                id 属性，对应接口的方法名称
+                parameterType 可以省略
+            3. sql语句
+                update 表名称  set 字段名称 = 字段值 where 主键=主键值
+                update ss_company set name=#{name} ..
+                这里的#{name} 中的name对象的就是company对象的属性
+    -->
+    <update id="update">
+        update ss_company
+        set
+            name=#{name},
+            expiration_date=#{expirationDate},
+            address=#{address},
+            license_id=#{licenseId},
+            representative=#{representative},
+            phone=#{phone},
+            company_size=#{companySize},
+            industry=#{industry},
+            remarks=#{remarks},
+            state=#{state},
+            balance=#{balance},
+            city=#{city}
+        where id=#{id}
+    </update>
+
+
+    <!--根据id查询企业信息-->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM `ss_company` WHERE id=#{id}
+    </select>
+
+
+    <!--根据id删除企业信息-->
+    <delete id="delete" >
+        DELETE FROM `ss_company` WHERE id=#{id}
+    </delete>
+
+
+</mapper>

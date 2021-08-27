@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+
+    <!-- 加载七牛云配置文件 -->
+    <context:property-placeholder location="classpath:qiniu.properties"/>
+
+    <!--1. 注解扫描-->
+    <context:component-scan base-package="com.itit.web"/>
+    <!--2. 配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!--3. 注解驱动（自动创建处理器映射器，处理器适配器）-->
+    <mvc:annotation-driven conversion-service="conversionServiceFactoryBean"/>
+    <!--4. 放行静态资源的访问-->
+    <mvc:default-servlet-handler/>
+    <!--5. 类型转换器-->
+    <bean class="org.springframework.context.support.ConversionServiceFactoryBean" id="conversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <!--引用容器中的自定义类型转换器-->
+                <ref bean="stringToDateConverter"/>
+            </set>
+        </property>
+    </bean>
+
+    <!--6. 文件上传解析器-->
+    <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" name="multipartResolver">
+        <!-- 允许上传文件的最大值10M  单位比特B  -->
+        <property name="maxUploadSize" value="10485760"/>
+    </bean>
+
+    <!--7.开启AOP注解支持-->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+    <!--8. bubbo配置 实现远程调用企业服务-->
+    <!--配置项目名称，用于计算依赖关系，唯一-->
+    <dubbo:application name="export_web_manager">
+        <dubbo:parameter key="qos.enable" value="false"/>
+    </dubbo:application>
+    <!--注册中心地址（记得先启动zookeeper、再启动服务提供者、最后再启动服务消费者）-->
+    <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
+    <!--开启dubbo注解扫描（扫描控制器的@Reference注解）-->
+    <dubbo:annotation package="com.itit.web.controller"/>
+    <!-- 启动服务消费者 默认自动检查服务提供者是否存在  false表示不检查 -->
+    <dubbo:consumer check="false"/>
+
+    
+</beans>

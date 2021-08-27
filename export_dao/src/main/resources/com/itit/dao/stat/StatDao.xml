@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace 指定对哪个接口进行映射-->
+<mapper namespace="com.itit.dao.stat.StatDao">
+
+    <select id="getFactoryData" resultType="java.util.Map">
+        -- 需求1：生产厂家销售统计
+        -- 根据生产厂家的货物销量进行统计。(补充需求：货物的销售金额要包含附件的金额)
+        SELECT p.name,SUM(p.value) `value` FROM(
+            -- 统计厂家的货物销售金额
+            SELECT
+                p.`factory_name` `name`,
+                SUM(p.`amount`) `value`
+            FROM `co_contract_product`  p
+            WHERE p.`factory_name` IS NOT NULL
+            GROUP BY p.`factory_name`
+
+            UNION ALL    -- 合并结果 union表示合并结果自动去重   union all 合并结果
+
+            -- 统计厂家的附件销售金额
+            SELECT
+                e.`factory_name` `name`,
+                SUM(e.`amount`) `value`
+            FROM `co_ext_cproduct` e
+            WHERE `factory_name` IS NOT NULL
+            GROUP BY e.`factory_name`
+        )p GROUP BY `name`
+    </select>
+
+
+    <select id="getProductData" resultType="java.util.Map">
+        -- 产品(货物)销售量要求按前5名统计
+        SELECT
+            p.`product_no` `name`,
+            SUM(p.`amount`) `value`
+        FROM `co_contract_product` p
+        WHERE `product_no` IS NOT NULL
+        GROUP BY `product_no`
+        ORDER BY `value`  DESC
+        LIMIT #{top}
+    </select>
+
+    <select id="getOnline" resultType="java.util.Map">
+        -- 需求3： 按小时统计系统的访问人数
+        SELECT s.`A1` `name`,IFNULL(p.`value`,0) `value`
+        FROM `st_online_info` s  -- 存储了0-23的小时字段
+        LEFT JOIN  -- 左连接
+        -- 按小时统计访问人数
+            (
+                SELECT
+                    DATE_FORMAT(`time`,'%H') `name`,
+                    COUNT(*) `value`
+                FROM `st_sys_log` GROUP BY `name`
+            ) p
+        ON s.`A1`=p.`name`
+    </select>
+</mapper>

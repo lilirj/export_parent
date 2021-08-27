@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:duboo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!--1. 配置项目名称-->
+    <duboo:application name="export_stat_service"/>
+    <!--2. 配置注册中心-->
+    <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
+    <!--3. 配置协议、服务端开放的访问端口-->
+    <duboo:protocol name="dubbo" port="20885"/>
+    <!--4. 开启dubbo注解扫描-->
+    <duboo:annotation package="com.itit.service.stat.impl"/>
+
+
+</beans>

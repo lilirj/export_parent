@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rebbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+    <!-- 编写spring整合rabbitmq配置文件 消息的消费者-->
+
+    <!--组件扫描，需要添加pom依赖 spring-context  加载监听器到容器中 -->
+    <context:component-scan base-package="com.itit.utils"/>
+
+    <!-- 配置连接-->
+    <rebbit:connection-factory
+            id="connectionFactory"
+            host="127.0.0.1"
+            port="5672"
+            username="lilili"
+            password="123456"
+            virtual-host="/itcast"/>
+
+    <rebbit:admin connection-factory="connectionFactory"/>
+
+    <rebbit:queue name="myQueue"/>
+
+    <rebbit:listener-container connection-factory="connectionFactory">
+        <!-- emailMessageListener 监听器对象 -->
+        <rebbit:listener ref="emailMessageListener" queue-names="myQueue"/>
+    </rebbit:listener-container>
+</beans>

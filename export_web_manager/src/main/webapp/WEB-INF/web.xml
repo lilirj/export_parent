@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<!--1. 配置spring提供的监听器，用来加载spring配置文件-->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<!--注意： 一定要写classpath*,表示加载所有项目类路径下的spring目录下的以applicationContext开头的配置文件-->
+		<param-value>classpath*:spring/applicationContext-*.xml</param-value>
+	</context-param>
+
+	<!--2. 配置springmvc的编码过滤器-->
+	<filter>
+		<filter-name>characterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>utf-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>characterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!--
+		配置shiro的过滤器
+		1. 委托代理过滤器
+		2. 作用：拦截请求，并没有真正处理请求，而是把请求的处理交给spring容器中指定名称的对象。
+		3. 这里的filter-name的值shiroFilter，要匹配spring容器中指定名称的bean
+		   稍后：applicationContext-shiro.xml配置文件中提供一个bean，名称是shiroFilter
+	-->
+	<filter>
+		<filter-name>shiroFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<init-param>
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>shiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+	<!--3. 配置springmvc前端控制器-->
+	<servlet>
+		<servlet-name> dispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:spring/springmvc.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>dispatcherServlet</servlet-name>
+		<!--这里拦截路径是`/`,就需要放行静态资源的访问-->
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+</web-app>
